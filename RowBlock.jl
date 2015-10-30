@@ -2,33 +2,50 @@ module sgd
 
 import ArrayViews, Base.show
 
+typealias SgdModel Dict{Int64, Float64}
+
 type Row
-	idx::ArrayViews.ContiguousView{Int64,1,Array{Int64,1}}
-	has_value::Bool #if true, value is non-empty
-	value::ArrayViews.ContiguousView{Float64,1,Array{Float64,1}}
+	idxs::ArrayViews.ContiguousView{Int64,1,Array{Int64,1}}
+	has_values::Bool #if true, values is non-empty
+	values::ArrayViews.ContiguousView{Float64,1,Array{Float64,1}}
 	label::Int64
 end
 
 function get_value(r::Row, i::Int64)
-	if (r.has_value) return r.value[i]
+	if (r.has_values) return r.values[i]
 	else return 1.0
 	end
 end
 
 function show(io::IO, r::Row)
 	print(io, r.label)
-	for i in 1:length(r.idx)
-		print(io, " $(r.idx[i]):$(get_value(r, i))")
+	for i in 1:length(r.idxs)
+		print(io, " $(r.idxs[i]):$(get_value(r, i))")
 	end
 	println(io, "")
 end
 
+function dot(r::Row, w::SgdModel)
+	res = 0
+	for i in 1:length(r.idxs)
+		idx = r.idxs[i]
+		if (haskey(w, idx))
+			res += w[idx] * get_value(r, i)
+		end	
+	end
+	return res
+end
+
 type RowBlock
 	offset::Vector{Int64} #offset[i] gives starting element of i^th row
-	idx::Vector{Int64}
-	has_value::Bool
-	value::Vector{Float64}
+	idxs::Vector{Int64}
+	has_values::Bool
+	values::Vector{Float64}
 	label::Vector{Int64}
+end
+
+function size(rb::RowBlock)
+	return length(rb.label)
 end
 
 function getindex(rb::RowBlock, i::Int64)
@@ -37,12 +54,12 @@ function getindex(rb::RowBlock, i::Int64)
 	if (i >= length(rb.offset)) j1 = length(rb.offset)
 	else j1 = rb.offset[i+1] - 1
 	end
-	if (rb.has_value)
-		val_view = ArrayViews.view(rb.value, j:j1)
+	if (rb.has_values)
+		val_view = ArrayViews.view(rb.values, j:j1)
 	else
 		val_view = Float64[]
 	end
-	return Row(ArrayViews.view(rb.idx, j:j1), rb.has_value, val_view, rb.label[i])
+	return Row(ArrayViews.view(rb.idxs, j:j1), rb.has_values, val_view, rb.label[i])
 end
 
 
@@ -57,6 +74,9 @@ function read_svfile(name::AbstractString)
 		push!(offset, i)
 		ix = findfirst(line, ' ')
 		y = parse(Int64, strip(line[1:ix-1]))
+		if (y != 1)
+			y = -1
+		end
 		push!(labels, y)
 		tokens = split(strip(line[ix+1:end]), ' ')
 		for token in tokens
