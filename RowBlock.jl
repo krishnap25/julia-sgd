@@ -1,5 +1,3 @@
-module sgd
-
 import ArrayViews, Base.show
 
 typealias SgdModel Dict{Int64, Float64}
@@ -51,13 +49,15 @@ end
 function getindex(rb::RowBlock, i::Int64)
 	#if (i > length(offset))
 	j = rb.offset[i]
-	if (i >= length(rb.offset)) j1 = length(rb.offset)
-	else j1 = rb.offset[i+1] - 1
-	end
+	#if (i >= length(rb.offset)) j1 = rb.offset[end]
+	#else j1 = rb.offset[i+1] - 1	
+	#end
+	j1 = rb.offset[i+1]-1
+	println("$(j) $(j1)")
 	if (rb.has_values)
 		val_view = ArrayViews.view(rb.values, j:j1)
 	else
-		val_view = Float64[]
+		val_view = ArrayViews.view(Float64[], :)
 	end
 	return Row(ArrayViews.view(rb.idxs, j:j1), rb.has_values, val_view, rb.label[i])
 end
@@ -70,6 +70,7 @@ function read_svfile(name::AbstractString)
 	offset = Int64[]
 	labels = Int64[]
 	i = 1
+	has_value = true
 	for line in eachline(fout)
 		push!(offset, i)
 		ix = findfirst(line, ' ')
@@ -82,16 +83,22 @@ function read_svfile(name::AbstractString)
 		for token in tokens
 			i += 1
 			colon_ix = findfirst(token, ':')
-			ix = parse(Int, token[1:colon_ix-1])
-			e = parse(Float64, token[colon_ix+1:end])
-			push!(idxs, ix)
-			push!(vals, e)
+			if (colon_ix != 0)
+				ix = parse(Int, token[1:colon_ix-1])
+				e = parse(Float64, token[colon_ix+1:end])
+				push!(idxs, ix)
+				push!(vals, e)
+			else
+				ix = parse(Int, strip(token))
+				push!(idxs, ix)
+				has_value = false
+			end
 		end
 	end
-	return RowBlock(offset, idxs, true, vals, labels)
+	push!(offset, i)
+	return RowBlock(offset, idxs, has_value, vals, labels)
 end
 
 
 
 
-end

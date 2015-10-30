@@ -1,5 +1,3 @@
-module sgd
-
 typealias SgdModel Dict{Int64, Float64}
 
 #abstract loss
@@ -68,4 +66,3 @@ end
 
 
 
-end

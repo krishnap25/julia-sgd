@@ -1,6 +1,3 @@
-package sgd
-
-
 
 type L1L2Penalty
 	lambda_l1::Float64
@@ -24,4 +21,3 @@ end
 
 
 
-end

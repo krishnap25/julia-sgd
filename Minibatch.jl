@@ -1,4 +1,3 @@
-module sgd
 
 type minibatch_iter
 		filename::AbstractString
@@ -9,8 +8,8 @@ end
 minibatch_iter(fn::AbstractString) = minibatch_iter(fn, open(fn, "r"), 0)
 
 function read_mb(mb_iter::minibatch_iter, mbsize::Int64)
-	if (!isopen(fp))
-		fp = open(filename, "r")
+	if (!isopen(mb_iter.fp))
+		mb_iter.fp = open(filename, "r")
 		println(STDERR, "SHOULD NOT REACH HERE IN READ_MB")
 	end
 	idxs = Int[]
@@ -18,8 +17,11 @@ function read_mb(mb_iter::minibatch_iter, mbsize::Int64)
 	offset = Int64[]
 	labels = Int64[]
 	i = 1
-	while (!eof(fout) && i <= mbsize)
-		line = readline(fout)	
+	num_rows = 1
+	has_value = true
+	while (!eof(mb_iter.fp) && num_rows <= mbsize)
+		num_rows += 1
+		line = readline(mb_iter.fp)	
 		push!(offset, i)
 		ix = findfirst(line, ' ')
 		y = parse(Int64, strip(line[1:ix-1]))
@@ -31,17 +33,23 @@ function read_mb(mb_iter::minibatch_iter, mbsize::Int64)
 		for token in tokens
 			i += 1
 			colon_ix = findfirst(token, ':')
-			ix = parse(Int, token[1:colon_ix-1])
-			e = parse(Float64, token[colon_ix+1:end])
-			push!(idxs, ix)
-			push!(vals, e)
+			if (colon_ix != 0)
+				ix = parse(Int, token[1:colon_ix-1])
+				e = parse(Float64, token[colon_ix+1:end])
+				push!(idxs, ix)
+				push!(vals, e)
+			else
+				ix = parse(Int, strip(token))
+				push!(idxs, ix)
+				has_value = false
+			end
 		end	
 	end
-	if (eof(fout))
+	push!(offset, i)
+	if (eof(mb_iter.fp))
 		mb_iter.num_passes += 1
-		fp = open(filename, "r")
+		mb_iter.fp = open(mb_iter.filename, "r")
 	end
-	return RowBlock(offset, idxs, true, vals, label)
+	return RowBlock(offset, idxs, has_value, vals, labels)
 end
 
-end
