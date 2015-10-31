@@ -4,7 +4,7 @@ type L1L2Penalty
 	lamdba_l2::Float64
 end
 
-function update(reg::L1L2Penalty, old_w::Float64, grad::Float64, eta::Float64) 
+function update_model(reg::L1L2Penalty, old_w::Float64, grad::Float64, eta::Float64) 
 	#eta: step-size
 	temp = eta*old_w - grad
 	if (abs(temp) < reg.lambda_l1)

@@ -50,7 +50,7 @@ function lossGradient(losstype::AbstractString, x::Float64)
 	end
 end
 
-function lossGrad(losstype::AbstractString, w::SgdModel, mb::RowBlock)
+function lossGradient(losstype::AbstractString, w::SgdModel, mb::RowBlock)
 	grad = Dict{Int64, Float64}()
 	for ii in 1:size(m)
 		r = mb[ii]

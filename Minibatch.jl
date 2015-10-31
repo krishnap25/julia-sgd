@@ -3,11 +3,15 @@ type minibatch_iter
 		filename::AbstractString
 		fp::IOStream
 		num_passes::Int64
+		mb_size::Int64 #default 1000
 end
 
-minibatch_iter(fn::AbstractString) = minibatch_iter(fn, open(fn, "r"), 0)
+minibatch_iter(fn::AbstractString) = minibatch_iter(fn, open(fn, "r"), 0, 1000) 
 
-function read_mb(mb_iter::minibatch_iter, mbsize::Int64)
+minibatch_iter(fn::AbstractString, mbsize::Int64) = minibatch_iter(fn, open(fn, "r"), 0, mbsize)
+
+function read_mb(mb_iter::minibatch_iter)
+	mbsize = mb_iter.mb_size
 	if (!isopen(mb_iter.fp))
 		mb_iter.fp = open(filename, "r")
 		println(STDERR, "SHOULD NOT REACH HERE IN READ_MB")
