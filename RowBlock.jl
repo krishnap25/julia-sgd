@@ -42,9 +42,9 @@ type RowBlock
 	label::Vector{Int64}
 end
 
-function size(rb::RowBlock)
-	return length(rb.label)
-end
+size(rb::RowBlock) = Base.length(rb.label)
+
+#length(rb::RowBlock) = Base.length(rb.label)
 
 function getindex(rb::RowBlock, i::Int64)
 	#if (i > length(offset))

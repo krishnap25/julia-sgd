@@ -63,6 +63,22 @@ function lossGradient(losstype::AbstractString, w::SgdModel, mb::RowBlock)
 	end
 	return grad
 end
+function lossGradientNormalized(losstype::AbstractString, w::SgdModel, mb::RowBlock)
+	grad = Dict{Int64, Float64}()
+	for ii in 1:size(m)
+		r = mb[ii]
+		lossD = lossGradient(losstype, r.label * dot(r, w))
+		for j in 1:size(r)
+			idx = r.idxs[i]
+			val = get_value(r, j) * r.label * lossD
+			grad[idx] = get(grad, idx, 0) + val
+		end
+	end
+	for (idx, g) in grad
+		grad[idx] = g/size(m)
+	end
+	return grad
+end
 
 
 

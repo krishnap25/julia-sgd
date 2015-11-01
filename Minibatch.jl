@@ -52,6 +52,7 @@ function read_mb(mb_iter::minibatch_iter)
 	push!(offset, i)
 	if (eof(mb_iter.fp))
 		mb_iter.num_passes += 1
+		close(mb_iter.fp)
 		mb_iter.fp = open(mb_iter.filename, "r")
 	end
 	return RowBlock(offset, idxs, has_value, vals, labels)
