@@ -32,14 +32,14 @@ function lossGradient(losstype::AbstractString, x::Float64)
 		return exp(log(1-exp(-x)) - log(1+exp(-x)))
 
 	elseif (losstype == "hinge")
-		if (x < 1)
+		if (x > 1)
 			return 0
 		else
 			return -1
 		end
 
 	elseif (losstype == "sqhinge")
-		if (x < 1)
+		if (x > 1)
 			return 0
 		else
 			return 2*(x-1)
@@ -52,30 +52,30 @@ end
 
 function lossGradient(losstype::AbstractString, w::SgdModel, mb::RowBlock)
 	grad = Dict{Int64, Float64}()
-	for ii in 1:size(m)
+	for ii in 1:size(mb)
 		r = mb[ii]
 		lossD = lossGradient(losstype, r.label * dot(r, w))
 		for j in 1:size(r)
-			idx = r.idxs[i]
+			idx = r.idxs[j]
 			val = get_value(r, j) * r.label * lossD
-			grad[idx] = get(grad, idx, 0) + val
+			grad[idx] = get(grad, idx, 0.0) + val
 		end
 	end
 	return grad
 end
 function lossGradientNormalized(losstype::AbstractString, w::SgdModel, mb::RowBlock)
 	grad = Dict{Int64, Float64}()
-	for ii in 1:size(m)
+	for ii in 1:size(mb)
 		r = mb[ii]
 		lossD = lossGradient(losstype, r.label * dot(r, w))
 		for j in 1:size(r)
-			idx = r.idxs[i]
+			idx = r.idxs[j]
 			val = get_value(r, j) * r.label * lossD
-			grad[idx] = get(grad, idx, 0) + val
+			grad[idx] = get(grad, idx, 0.0) + val
 		end
 	end
 	for (idx, g) in grad
-		grad[idx] = g/size(m)
+		grad[idx] = g/size(mb)
 	end
 	return grad
 end

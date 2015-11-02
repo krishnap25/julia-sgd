@@ -1,5 +1,7 @@
 module sgd
 
+export run_sgd, predict
+
 include("RowBlock.jl")
 include("Minibatch.jl")
 include("Loss.jl")

@@ -1,13 +1,15 @@
 import ArrayViews, Base.show
 
 typealias SgdModel Dict{Int64, Float64}
-
+import Base.getindex
 type Row
 	idxs::ArrayViews.ContiguousView{Int64,1,Array{Int64,1}}
 	has_values::Bool #if true, values is non-empty
 	values::ArrayViews.ContiguousView{Float64,1,Array{Float64,1}}
 	label::Int64
 end
+
+size(r::Row) = Base.length(r.idxs)
 
 function get_value(r::Row, i::Int64)
 	if (r.has_values) return r.values[i]
@@ -24,7 +26,7 @@ function show(io::IO, r::Row)
 end
 
 function dot(r::Row, w::SgdModel)
-	res = 0
+	res = 0.0
 	for i in 1:length(r.idxs)
 		idx = r.idxs[i]
 		if (haskey(w, idx))
@@ -53,7 +55,6 @@ function getindex(rb::RowBlock, i::Int64)
 	#else j1 = rb.offset[i+1] - 1	
 	#end
 	j1 = rb.offset[i+1]-1
-	println("$(j) $(j1)")
 	if (rb.has_values)
 		val_view = ArrayViews.view(rb.values, j:j1)
 	else
