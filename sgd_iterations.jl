@@ -1,9 +1,9 @@
 function norm(w::SgdModel)
-  n = 0.0
-  for x in values(w)
-    n += x^2
-  end
-  return sqrt(n)
+	n = 0.0
+	for x in values(w)
+		n += x^2
+	end
+	return sqrt(n)
 end
 
 function init_sgd(lambda_l1::Float64, lambda_l2::Float64, filename::AbstractString, mb_size::Int64)
@@ -13,62 +13,63 @@ function init_sgd(lambda_l1::Float64, lambda_l2::Float64, filename::AbstractStri
 	return w, mb_iter, penalty
 end
 
-function run_sgd(losstype::AbstractString, lambda_l1::Float64, lambda_l2::Float64, trainingfile::AbstractString, mb_size::Int64, max_data_pass::Int64)
+function run_sgd(losstype::AbstractString, lambda_l1::Float64, lambda_l2::Float64, trainingfile::AbstractString, testfile::AbstractString, mb_size::Int64, max_data_pass::Int64)
 	beta = 1 
 	alpha = 0.1 #defaults
 	w, mb_iter, penalty = init_sgd(lambda_l1, lambda_l2, trainingfile, mb_size)
 	t = 1.0
 	while (mb_iter.num_passes < max_data_pass)
-    eta = (beta + sqrt(t))/ alpha #step size
-	  old_iter = mb_iter.num_passes
-	  grad = lossGradientNormalized(losstype, w, read_mb(mb_iter))
-    #println(norm(grad))
-	  new_iter = mb_iter.num_passes
-    old_w::Float64 = 0.0
-    new_w::Float64 = 0.0
-	  if (new_iter != old_iter)
-		  println("Iteration $(new_iter) complete")
-	  end	
-	  for (idx, grad_val) in grad
-		  #update
-		  old_w = get(w, idx, 0.0)
-		  new_w = update_model(penalty, old_w, grad_val, eta)
-		  if (new_w == 0)
-			  delete!(w, idx)
-		  else
-			  w[idx] = new_w
-		  end
-	  end
-    #println("norm : $(norm(w))")
-    t += 1
+		eta = (beta + sqrt(t))/ alpha #step size
+		old_iter = mb_iter.num_passes
+		grad = lossGradientNormalized(losstype, w, read_mb(mb_iter))
+		#println(norm(grad))
+		new_iter = mb_iter.num_passes
+		old_w::Float64 = 0.0
+		new_w::Float64 = 0.0
+		for (idx, grad_val) in grad
+			#update
+			old_w = get(w, idx, 0.0)
+			new_w = update_model(penalty, old_w, grad_val, eta)
+			if (new_w == 0.0)
+				delete!(w, idx)
+			else
+				w[idx] = new_w
+			end
+		end
+		#println("norm : $(norm(w))")
+		if (new_iter != old_iter)
+			acc = predict(testfile, w)
+			println("Iteration $(new_iter): Accuracy $(acc), Sparsity $(length(collect(keys(w))))")
+		end	
+		t += 1
 	end
 	return w
 end
 
-function sgd_one_iter(losstype::AbstractString, w::SgdModel, mb_iter::minibatch_iter, penalty::L1L2Penalty, timestep::Float64)
-	beta = 1 
-	alpha = 0.1 #defaults
-	eta = (beta + sqrt(timestep))/ alpha #step size
-	old_iter = mb_iter.num_passes
-	grad = lossGradientNormalized(losstype, w, read_mb(mb_iter))
-	new_iter = mb_iter.num_passes
-  old_w::Float64 = 0.0
-  new_w::Float64 = 0.0
-	if (new_iter != old_iter)
-		println("Iteration $(new_iter) complete")
-	end	
-	for (idx, grad_val) in grad
-		#update
-		old_w = get(w, idx, 0.0)
-		new_w = update_model(penalty, old_w, grad_val, eta)
-		if (new_w == 0)
-			delete!(w, idx)
-		else
-			w[idx] = new_w
-		end
-	end
-  println("norm : $(norm(w))")
-end
+#function sgd_one_iter(losstype::AbstractString, w::SgdModel, mb_iter::minibatch_iter, penalty::L1L2Penalty, timestep::Float64)
+#	beta = 1 
+#	alpha = 0.1 #defaults
+#	eta = (beta + sqrt(timestep))/ alpha #step size
+#	old_iter = mb_iter.num_passes
+#	grad = lossGradientNormalized(losstype, w, read_mb(mb_iter))
+#	new_iter = mb_iter.num_passes
+#	old_w::Float64 = 0.0
+#	new_w::Float64 = 0.0
+#	if (new_iter != old_iter)
+#		println("Iteration $(new_iter) complete")
+#	end	
+#	for (idx, grad_val) in grad
+#		#update
+#		old_w = get(w, idx, 0.0)
+#		new_w = update_model(penalty, old_w, grad_val, eta)
+#		if (new_w == 0)
+#			delete!(w, idx)
+#		else
+#			w[idx] = new_w
+#		end
+#	end
+#	println("norm : $(norm(w))")
+#end
 
 #function run_sgd(losstype::AbstractString, lambda_l1::Float64, lambda_l2::Float64, trainingfile::AbstractString, mb_size::Int64, max_data_pass::Int64)
 #
@@ -111,7 +112,7 @@ function predict(testfile::AbstractString, w::SgdModel)
 		end
 		total += 1
 	end
-  println("$(correct)/$(total)")
+	println("$(correct)/$(total)")
 
 	return correct/total	
 end

@@ -1,9 +1,9 @@
 
 type minibatch_iter
-		filename::AbstractString
-		fp::IOStream
-		num_passes::Int64
-		mb_size::Int64 #default 1000
+	filename::AbstractString
+	fp::IOStream
+	num_passes::Int64
+	mb_size::Int64 #default 1000
 end
 
 minibatch_iter(fn::AbstractString) = minibatch_iter(fn, open(fn, "r"), 0, 1000) 

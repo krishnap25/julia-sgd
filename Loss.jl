@@ -3,7 +3,7 @@ typealias SgdModel Dict{Int64, Float64}
 #abstract loss
 
 function loss(losstype::AbstractString, x::Float64)
-	
+
 	if (losstype == "logistic" || losstype == "logloss")
 		return log(1 + exp(-x))
 
@@ -28,17 +28,17 @@ function loss(losstype::AbstractString, w::SgdModel, mb::RowBlock)
 end
 
 function lossGradient(losstype::AbstractString, x::Float64)
-	if (losstype == "logistic")
-		return exp(log(1-exp(-x)) - log(1+exp(-x)))
+	if (losstype == "logistic" || losstype == "logloss")
+		return -1/(1+exp(x))
 
-	elseif (losstype == "hinge")
+	elseif (losstype == "hinge" || losstype == "l1svm" || losstype == "svm")
 		if (x > 1)
 			return 0
 		else
 			return -1
 		end
 
-	elseif (losstype == "sqhinge")
+	elseif (losstype == "sqhinge" || losstype == "l2svm")
 		if (x > 1)
 			return 0
 		else
