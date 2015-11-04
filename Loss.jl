@@ -2,15 +2,15 @@ typealias SgdModel Dict{Int64, Float64}
 
 #abstract loss
 
-function loss(losstype::AbstractString, x::Float64)
+function loss(losstype::Int, x::Float64)
 
-	if (losstype == "logistic" || losstype == "logloss")
+	if (losstype == 1)
 		return log(1 + exp(-x))
 
-	elseif (losstype == "hinge" || losstype == "l1svm" || losstype == "svm")
+	elseif (losstype == 2)
 		return max(0, 1-x)
 
-	elseif (losstype == "sqhinge" || losstype == "l2svm")
+	elseif (losstype == 3)
 		return max(0, 1-x)^2
 
 	else
@@ -18,7 +18,7 @@ function loss(losstype::AbstractString, x::Float64)
 	end
 end
 
-function loss(losstype::AbstractString, w::SgdModel, mb::RowBlock)
+function loss(losstype::Int, w::SgdModel, mb::RowBlock)
 	res = 0
 	for i in 1:size(m)
 		r = mb[i]
@@ -27,18 +27,18 @@ function loss(losstype::AbstractString, w::SgdModel, mb::RowBlock)
 	return res
 end
 
-function lossGradient(losstype::AbstractString, x::Float64)
-	if (losstype == "logistic" || losstype == "logloss")
+function lossGradient(losstype::Int, x::Float64)
+	if (losstype == 1)
 		return -1/(1+exp(x))
 
-	elseif (losstype == "hinge" || losstype == "l1svm" || losstype == "svm")
+	elseif (losstype == 2)
 		if (x > 1)
 			return 0
 		else
 			return -1
 		end
 
-	elseif (losstype == "sqhinge" || losstype == "l2svm")
+	elseif (losstype == 3)
 		if (x > 1)
 			return 0
 		else
@@ -50,7 +50,7 @@ function lossGradient(losstype::AbstractString, x::Float64)
 	end
 end
 
-function lossGradient(losstype::AbstractString, w::SgdModel, mb::RowBlock)
+function lossGradient(losstype::Int, w::SgdModel, mb::RowBlock)
 	grad = Dict{Int64, Float64}()
 	for ii in 1:size(mb)
 		r = mb[ii]
@@ -63,7 +63,7 @@ function lossGradient(losstype::AbstractString, w::SgdModel, mb::RowBlock)
 	end
 	return grad
 end
-function lossGradientNormalized(losstype::AbstractString, w::SgdModel, mb::RowBlock)
+function lossGradientNormalized(losstype::Int, w::SgdModel, mb::RowBlock)
 	grad = Dict{Int64, Float64}()
 	for ii in 1:size(mb)
 		r = mb[ii]

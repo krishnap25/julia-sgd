@@ -13,7 +13,7 @@ function init_sgd(lambda_l1::Float64, lambda_l2::Float64, filename::AbstractStri
 	return w, mb_iter, penalty
 end
 
-function run_sgd(losstype::AbstractString, lambda_l1::Float64, lambda_l2::Float64, trainingfile::AbstractString, testfile::AbstractString, mb_size::Int64, max_data_pass::Int64)
+function run_sgd(losstype::Int, lambda_l1::Float64, lambda_l2::Float64, trainingfile::AbstractString, testfile::AbstractString, mb_size::Int64, max_data_pass::Int64)
 	beta = 1 
 	alpha = 0.1 #defaults
 	w, mb_iter, penalty = init_sgd(lambda_l1, lambda_l2, trainingfile, mb_size)
