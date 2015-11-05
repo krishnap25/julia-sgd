@@ -19,14 +19,16 @@ end
 function run_sgd(losstype::Int, lambda_l1::Float64, lambda_l2::Float64, trainingfile::AbstractString, testfile::AbstractString, mb_size::Int64, max_data_pass::Int64)
 	beta = 1.0
 	alpha = 0.1 #defaults
+	eta = 0.0
 	w::SgdModel, mb_iter::minibatch_iter, penalty::L1L2Penalty = init_sgd(lambda_l1, lambda_l2, trainingfile, mb_size)
-	t = 1.0
-	while (mb_iter.num_passes::Int < max_data_pass)
-		eta::Float64 = (beta + sqrt(t))/ alpha #step size
-		old_iter::Int = mb_iter.num_passes
+	t::Float64 = 1.0
+	new_iter = 0
+	while (new_Iter < max_data_pass)
+		eta =( (beta + sqrt(t)) / alpha) #step size
+		old_iter = mb_iter.num_passes
 		grad = lossGradientNormalized(losstype, w, read_mb(mb_iter))
 		#println(norm(grad))
-		new_iter::Int = mb_iter.num_passes
+		new_iter = mb_iter.num_passes
 		old_w::Float64 = 0.0
 		new_w::Float64 = 0.0
 		for (idx::Int, grad_val::Float64) in grad
@@ -44,7 +46,7 @@ function run_sgd(losstype::Int, lambda_l1::Float64, lambda_l2::Float64, training
 			acc = predict(testfile, w)
 			println("Iteration $(new_iter): Accuracy $(acc), Sparsity $(length(collect(keys(w))))")
 		end	
-		t += 1
+		t += one(t)
 	end
 	return w
 end
