@@ -38,20 +38,21 @@ function lossGradient(losstype::Int, x::Float64)
 
 	elseif (losstype == 2)
 		if (x > 1.0)
-			return 0
+			return 0.0
 		else
-			return -1
+			return -1.0
 		end
 
 	elseif (losstype == 3)
 		if (x > 1.0)
-			return 0
+			return 0.0
 		else
 			return 2.0*(x-1.0)
 		end
 
 	else
 		println(STDERR, "unknown loss")
+		return 0.0
 	end
 end
 
