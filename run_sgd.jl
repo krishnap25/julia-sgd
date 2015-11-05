@@ -1,6 +1,5 @@
 #!/usr/bin/env julia
 
-import sgd
 using sgd
 
 function main()

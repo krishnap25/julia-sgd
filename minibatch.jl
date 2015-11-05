@@ -1,3 +1,7 @@
+module minibatch
+
+importall rowblock
+export minibatch_iter, read_mb
 
 type minibatch_iter
 	filename::AbstractString
@@ -58,3 +62,4 @@ function read_mb(mb_iter::minibatch_iter)
 	return RowBlock(offset, idxs, has_value, vals, labels)
 end
 
+end #module

@@ -1,3 +1,6 @@
+
+typealias SgdModel Dict{Int64, Float64}
+
 function norm(w::SgdModel)
 	n = 0.0
 	for x in values(w)

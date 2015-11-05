@@ -1,3 +1,6 @@
+module l1l2Penalty
+
+export L1L2Penalty, update_model
 
 type L1L2Penalty
 	lambda_l1::Float64
@@ -15,9 +18,5 @@ function update_model(reg::L1L2Penalty, old_w::Float64, grad::Float64, eta::Floa
 	end
 end
 
-
-
-
-
-
+end #module
 

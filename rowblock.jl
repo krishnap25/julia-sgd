@@ -1,4 +1,8 @@
+module rowblock
+
 import ArrayViews, Base.show
+
+export Row, dot, RowBlock, size, getindex, read_svfile, get_value
 
 typealias SgdModel Dict{Int64, Float64}
 import Base.getindex
@@ -102,4 +106,4 @@ end
 
 
 
-
+end #module

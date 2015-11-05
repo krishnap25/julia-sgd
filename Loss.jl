@@ -1,3 +1,8 @@
+module Loss
+
+importall rowblock
+export loss, lossGradient, lossGradientNormalized
+
 typealias SgdModel Dict{Int64, Float64}
 
 #abstract loss
@@ -81,4 +86,4 @@ function lossGradientNormalized(losstype::Int, w::SgdModel, mb::RowBlock)
 end
 
 
-
+end #module
