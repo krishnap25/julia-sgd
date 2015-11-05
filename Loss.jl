@@ -34,20 +34,20 @@ end
 
 function lossGradient(losstype::Int, x::Float64)
 	if (losstype == 1)
-		return -1/(1+exp(x))
+		return -1.0/(1.0+exp(x))
 
 	elseif (losstype == 2)
-		if (x > 1)
+		if (x > 1.0)
 			return 0
 		else
 			return -1
 		end
 
 	elseif (losstype == 3)
-		if (x > 1)
+		if (x > 1.0)
 			return 0
 		else
-			return 2*(x-1)
+			return 2.0*(x-1.0)
 		end
 
 	else
@@ -72,7 +72,7 @@ function lossGradientNormalized(losstype::Int, w::SgdModel, mb::RowBlock)
 	grad = Dict{Int64, Float64}()
 	for ii in 1:size(mb)
 		r = mb[ii]
-		lossD = lossGradient(losstype, r.label * dot(r, w))
+		lossD::Float64 = lossGradient(losstype, r.label * dot(r, w))
 		for j in 1:size(r)
 			idx = r.idxs[j]
 			val = get_value(r, j) * r.label * lossD

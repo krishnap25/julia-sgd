@@ -17,19 +17,19 @@ function init_sgd(lambda_l1::Float64, lambda_l2::Float64, filename::AbstractStri
 end
 
 function run_sgd(losstype::Int, lambda_l1::Float64, lambda_l2::Float64, trainingfile::AbstractString, testfile::AbstractString, mb_size::Int64, max_data_pass::Int64)
-	beta = 1 
+	beta = 1.0
 	alpha = 0.1 #defaults
-	w, mb_iter, penalty = init_sgd(lambda_l1, lambda_l2, trainingfile, mb_size)
+	w::SgdModel, mb_iter::minibatch_iter, penalty::L1L2Penalty = init_sgd(lambda_l1, lambda_l2, trainingfile, mb_size)
 	t = 1.0
-	while (mb_iter.num_passes < max_data_pass)
-		eta = (beta + sqrt(t))/ alpha #step size
-		old_iter = mb_iter.num_passes
+	while (mb_iter.num_passes::Int < max_data_pass)
+		eta::Float64 = (beta + sqrt(t))/ alpha #step size
+		old_iter::Int = mb_iter.num_passes
 		grad = lossGradientNormalized(losstype, w, read_mb(mb_iter))
 		#println(norm(grad))
-		new_iter = mb_iter.num_passes
+		new_iter::Int = mb_iter.num_passes
 		old_w::Float64 = 0.0
 		new_w::Float64 = 0.0
-		for (idx, grad_val) in grad
+		for (idx::Int, grad_val::Float64) in grad
 			#update
 			old_w = get(w, idx, 0.0)
 			new_w = update_model(penalty, old_w, grad_val, eta)
