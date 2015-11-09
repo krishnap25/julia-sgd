@@ -108,9 +108,9 @@ function predict(testfile::AbstractString, w::SgdModel)
 				e = parse(Float64, token[colon_ix+1:end])
 			else
 				ix = parse(Int, strip(token))
-				e = 1
+				e = 1.0
 			end
-			dotp += (get(w, ix, 0) * e)
+			dotp += (get(w, ix, 0.0) * e)
 		end
 		if (sign(dotp) == y)
 			correct += 1
