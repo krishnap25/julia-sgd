@@ -23,7 +23,7 @@ function run_sgd(losstype::Int, lambda_l1::Float64, lambda_l2::Float64, training
 	w::SgdModel, mb_iter::minibatch_iter, penalty::L1L2Penalty = init_sgd(lambda_l1, lambda_l2, trainingfile, mb_size)
 	t::Float64 = 1.0
 	new_iter = 0
-	while (new_Iter < max_data_pass)
+	while (new_iter < max_data_pass)
 		eta =( (beta + sqrt(t)) / alpha) #step size
 		old_iter = mb_iter.num_passes
 		grad = lossGradientNormalized(losstype, w, read_mb(mb_iter))
