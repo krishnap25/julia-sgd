@@ -3,20 +3,35 @@
 using sgd
 
 function main()
-	#args: trainfilename testfilename, num_passes, lambda_l1, lambda_l2, 	
+	#args: dataset trainfilename testfilename, num_passes, lambda_l1, lambda_l2, 	
 	num_args::Int8 = 1
+  dataset = ARGS[num_args] ; num_args += 1
 	const trainfile = ARGS[num_args] ; num_args += 1
 	const testfile = ARGS[num_args] ; num_args += 1
 	const num_passes = parse(Int, ARGS[num_args]) ; num_args += 1
-	const lambda_l1 = 1e-2
-	const lambda_l2 = 1e-3
-	const mb_size = 10000
-	println("Starting")
+
+  #params: lambda_l1 lambda_l2 alpha beta
+
+  if (dataset == "ctra")
+    params = [1e-2 1e-3  0.2 1]
+  elseif (dataset == "criteo_s")
+    params = [5e-4 1e-4  0.8 1]
+  else
+    println("Unrecognized dataset. Supply params!")
+    return 0
+  end
+
+
+	lambda_l1 = params[1]
+	lambda_l2 = params[2]
+	mb_size = 10000
+	#println("Starting")
+	println("Starting: lambda_l1 = $(lambda_l1) ; lambda_l2 = $(lambda_l2)")
 
 	#function run_sgd(losstype::AbstractString, lambda_l1::Float64, lambda_l2::Float64, trainingfile::AbstractString, mb_size::Int64, max_data_pass::Int64)
 	loss_dict = Dict("logistic" => 1, "logloss" => 1, "1" => 1, "hinge" => 2, "2" => 2, "l1svm" => 2, "svm" => 2, "sqhinge" => 3, "l2svm" => 3, "3" => 3)
 	loss = "sqhinge"
-	w = run_sgd(loss_dict[loss], lambda_l1, lambda_l2, trainfile, testfile,  mb_size, num_passes)
+	w = run_sgd(loss_dict[loss], lambda_l1, lambda_l2, trainfile, testfile,  mb_size, num_passes, params[3], params[4])
 	println("Done learning")
 	acc = predict(testfile, w)
 	println("Accuracy = $(acc)")

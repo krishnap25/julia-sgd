@@ -1,5 +1,5 @@
 
-typealias SgdModel Dict{Int64, Float64}
+typealias SgdModel Dict{UInt64, Float64}
 
 function norm(w::SgdModel)
 	n = 0.0
@@ -16,9 +16,9 @@ function init_sgd(lambda_l1::Float64, lambda_l2::Float64, filename::AbstractStri
 	return w, mb_iter, penalty
 end
 
-function run_sgd(losstype::Int, lambda_l1::Float64, lambda_l2::Float64, trainingfile::AbstractString, testfile::AbstractString, mb_size::Int64, max_data_pass::Int64)
-	beta = 1.0
-	alpha = 0.1 #defaults
+function run_sgd(losstype::Int, lambda_l1::Float64, lambda_l2::Float64, trainingfile::AbstractString, testfile::AbstractString, mb_size::Int64, max_data_pass::Int64, alpha::Float64, beta::Float64)
+	#beta = 1.0
+	#alpha = 0.1 #defaults
 	eta = 0.0
 	w::SgdModel, mb_iter::minibatch_iter, penalty::L1L2Penalty = init_sgd(lambda_l1, lambda_l2, trainingfile, mb_size)
 	t::Float64 = 1.0
@@ -27,11 +27,11 @@ function run_sgd(losstype::Int, lambda_l1::Float64, lambda_l2::Float64, training
 		eta =( (beta + sqrt(t)) / alpha) #step size
 		old_iter = mb_iter.num_passes
 		grad = lossGradientNormalized(losstype, w, read_mb(mb_iter))
-		#println(norm(grad))
+	  println("$(t): $(norm(grad)) $(norm(w))")
 		new_iter = mb_iter.num_passes
 		old_w::Float64 = 0.0
 		new_w::Float64 = 0.0
-		for (idx::Int, grad_val::Float64) in grad
+		for (idx::UInt64, grad_val::Float64) in grad
 			#update
 			old_w = get(w, idx, 0.0)
 			new_w = update_model(penalty, old_w, grad_val, eta)
@@ -104,10 +104,10 @@ function predict(testfile::AbstractString, w::SgdModel)
 		for token in tokens
 			colon_ix = findfirst(token, ':')
 			if (colon_ix != 0)
-				ix = parse(Int, token[1:colon_ix-1])
+				ix = parse(UInt64, token[1:colon_ix-1])
 				e = parse(Float64, token[colon_ix+1:end])
 			else
-				ix = parse(Int, strip(token))
+				ix = parse(UInt64, strip(token))
 				e = 1.0
 			end
 			dotp += (get(w, ix, 0.0) * e)

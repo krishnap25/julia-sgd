@@ -4,10 +4,10 @@ import ArrayViews, Base.show
 
 export Row, dot, RowBlock, size, getindex, read_svfile, get_value
 
-typealias SgdModel Dict{Int64, Float64}
+typealias SgdModel Dict{UInt64, Float64}
 import Base.getindex
 type Row
-	idxs::ArrayViews.ContiguousView{Int64,1,Array{Int64,1}}
+	idxs::ArrayViews.ContiguousView{UInt64,1,Array{UInt64,1}}
 	has_values::Bool #if true, values is non-empty
 	values::ArrayViews.ContiguousView{Float64,1,Array{Float64,1}}
 	label::Int64
@@ -42,7 +42,7 @@ end
 
 type RowBlock
 	offset::Vector{Int64} #offset[i] gives starting element of i^th row
-	idxs::Vector{Int64}
+	idxs::Vector{UInt64}
 	has_values::Bool
 	values::Vector{Float64}
 	label::Vector{Int64}
@@ -70,7 +70,7 @@ end
 
 function read_svfile(name::AbstractString)
 	fout = open(name, "r")
-	idxs = Int[]
+	idxs = UInt64[]
 	vals = Float64[]
 	offset = Int64[]
 	labels = Int64[]
@@ -89,12 +89,12 @@ function read_svfile(name::AbstractString)
 			i += 1
 			colon_ix = findfirst(token, ':')
 			if (colon_ix != 0)
-				ix = parse(Int, token[1:colon_ix-1])
+				ix = parse(UInt64, token[1:colon_ix-1])
 				e = parse(Float64, token[colon_ix+1:end])
 				push!(idxs, ix)
 				push!(vals, e)
 			else
-				ix = parse(Int, strip(token))
+				ix = parse(UInt64, strip(token))
 				push!(idxs, ix)
 				has_value = false
 			end

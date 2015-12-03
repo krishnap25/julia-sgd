@@ -3,7 +3,7 @@ module Loss
 importall rowblock
 export loss, lossGradient, lossGradientNormalized
 
-typealias SgdModel Dict{Int64, Float64}
+typealias SgdModel Dict{UInt64, Float64}
 
 #abstract loss
 
@@ -57,7 +57,7 @@ function lossGradient(losstype::Int, x::Float64)
 end
 
 function lossGradient(losstype::Int, w::SgdModel, mb::RowBlock)
-	grad = Dict{Int64, Float64}()
+	grad = Dict{UInt64, Float64}()
 	for ii in 1:size(mb)
 		r = mb[ii]
 		lossD = lossGradient(losstype, r.label * dot(r, w))
@@ -70,7 +70,7 @@ function lossGradient(losstype::Int, w::SgdModel, mb::RowBlock)
 	return grad
 end
 function lossGradientNormalized(losstype::Int, w::SgdModel, mb::RowBlock)
-	grad = Dict{Int64, Float64}()
+	grad = Dict{UInt64, Float64}()
 	for ii in 1:size(mb)
 		r = mb[ii]
 		lossD::Float64 = lossGradient(losstype, r.label * dot(r, w))

@@ -20,7 +20,7 @@ function read_mb(mb_iter::minibatch_iter)
 		mb_iter.fp = open(filename, "r")
 		println(STDERR, "SHOULD NOT REACH HERE IN READ_MB")
 	end
-	idxs = Int[]
+	idxs = UInt64[]
 	vals = Float64[]
 	offset = Int64[]
 	labels = Int64[]
@@ -42,12 +42,12 @@ function read_mb(mb_iter::minibatch_iter)
 			i += 1
 			colon_ix = findfirst(token, ':')
 			if (colon_ix != 0)
-				ix = parse(Int, token[1:colon_ix-1])
+				ix = parse(UInt64, token[1:colon_ix-1])
 				e = parse(Float64, token[colon_ix+1:end])
 				push!(idxs, ix)
 				push!(vals, e)
 			else
-				ix = parse(Int, strip(token))
+				ix = parse(UInt64, strip(token))
 				push!(idxs, ix)
 				has_value = false
 			end
