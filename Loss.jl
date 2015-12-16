@@ -69,19 +69,16 @@ function lossGradient(losstype::Int, w::SgdModel, mb::RowBlock)
 	end
 	return grad
 end
-function lossGradientNormalized(losstype::Int, w::SgdModel, mb::RowBlock)
-	grad = Dict{UInt64, Float64}()
+function lossGradientNormalized(losstype::Int, w::SgdModel, mb::RowBlock, dim)
+	grad = Vector{Float64}(dim)
 	for ii in 1:size(mb)
 		r = mb[ii]
 		lossD::Float64 = lossGradient(losstype, r.label * dot(r, w))
 		for j in 1:size(r)
 			idx = r.idxs[j]
 			val = get_value(r, j) * r.label * lossD
-			grad[idx] = get(grad, idx, 0.0) + val
+			grad[idx] = get(grad, idx, 0.0) + val/size(mb)
 		end
-	end
-	for (idx, g) in grad
-		grad[idx] = g/size(mb)
 	end
 	return grad
 end
