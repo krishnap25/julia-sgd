@@ -14,8 +14,10 @@ function main()
 
   if (dataset == "ctra")
     params = [1e-2 1e-3  0.2 1]
+  elseif (dataset == "ctrb")
+    params = [5e-3 1e-4  0.09 1]
   elseif (dataset == "criteo_s")
-    params = [5e-4 1e-4  0.8 1]
+    params = [5e-4 1e-4  3 1]
   else
     println("Unrecognized dataset. Supply params!")
     return 0
