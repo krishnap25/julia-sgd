@@ -79,7 +79,7 @@ function localize(rb::RowBlock)
 
 	#sort pair
 	sort!(pa)
-	println(pa)
+	#println(pa)
 	#copy rb
 	rb1 = deepcopy(rb)
 	uniq_id = Uint64[]
