@@ -2,7 +2,7 @@ module rowblock
 
 import ArrayViews, Base.show
 
-export Row, dot, RowBlock, size, getindex, read_svfile, get_value
+export Row, dot, RowBlock, size, getindex, read_svfile, get_value, localize
 
 typealias SgdModel Dict{UInt64, Float64}
 import Base.getindex
@@ -65,6 +65,38 @@ function getindex(rb::RowBlock, i::Int64)
 		val_view = ArrayViews.view(Float64[], :)
 	end
 	return Row(ArrayViews.view(rb.idxs, j:j1), rb.has_values, val_view, rb.label[i])
+end	
+
+
+function localize(rb::RowBlock)
+	
+	idxs = rb.idxs
+	pa = Vector{Tuple{UInt64, Int64}}()
+	#populate pair
+	for i in 1:length(idxs)
+		push!(pa, (idxs[i], i))
+	end
+
+	#sort pair
+	sort!(pa)
+	println(pa)
+	#copy rb
+	rb1 = deepcopy(rb)
+	uniq_id = Uint64[]
+	#renumber
+	prev_id = 0
+	id_new = 0
+	for (id, posn) in pa
+		if (id == prev_id)
+			rb1.idxs[posn] = id_new
+		else
+			push!(uniq_id, id)
+			prev_id = id
+			id_new += 1
+			rb1.idxs[posn] = id_new
+		end
+	end
+	return rb1, uniq_id
 end
 
 
