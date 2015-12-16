@@ -9,46 +9,39 @@ function norm(w::SgdModel)
 	return sqrt(n)
 end
 
-function init_sgd(lambda_l1::Float64, lambda_l2::Float64, filename::AbstractString, mb_size::Int64)
-	w = SgdModel()
-	mb_iter = minibatch_iter(filename, mb_size)
-	penalty = L1L2Penalty(lambda_l1, lambda_l2)
-	return w, mb_iter, penalty
-end
-
 function run_sgd(losstype::Int, lambda_l1::Float64, lambda_l2::Float64, trainingfile::AbstractString, testfile::AbstractString, mb_size::Int64, max_data_pass::Int64, alpha::Float64, beta::Float64)
 	#beta = 1.0
 	#alpha = 0.1 #defaults
 	eta = 0.0
-	w::SgdModel, mb_iter::minibatch_iter, penalty::L1L2Penalty = init_sgd(lambda_l1, lambda_l2, trainingfile, mb_size)
+	mb_iter = minibatch_iter(trainingfile, mb_size)
+	ps = init_PS(lambda_l1, lambda_l2)
 	t::Float64 = 1.0
 	new_iter = 0
 	while (new_iter < max_data_pass)
 		eta =( (beta + sqrt(t)) / alpha) #step size
 		old_iter = mb_iter.num_passes
-		grad = lossGradientNormalized(losstype, w, read_mb(mb_iter))
-	  println("$(t): $(norm(grad)) $(norm(w))")
+		#Read and PULL VALS	
+		mb = read_mb(mb_iter)
+		req_ks = unique(mb.idxs)
+		w_ks, w_vals = pull(ps, req_ks)
+		w = [w_ks[i]::UInt64 => w_vals[i]::Float64 for i in 1:length(w_ks)]
+		
+		#compute gradient
+		grad = lossGradientNormalized(losstype, w, mb)
+	  	println("$(t): $(norm(grad)) $(norm(w))")
 		new_iter = mb_iter.num_passes
-		old_w::Float64 = 0.0
-		new_w::Float64 = 0.0
-		for (idx::UInt64, grad_val::Float64) in grad
-			#update
-			old_w = get(w, idx, 0.0)
-			new_w = update_model(penalty, old_w, grad_val, eta)
-			if (new_w == 0.0)
-				delete!(w, idx)
-			else
-				w[idx] = new_w
-			end
-		end
+			
+		#push update
+		push(ps, collect(keys(grad)), collect(values(grad)), eta)
+
 		#println("norm : $(norm(w))")
 		if (new_iter != old_iter)
-			acc = predict(testfile, w)
+			acc = predict(testfile, ps)
 			println("Iteration $(new_iter): Accuracy $(acc), Sparsity $(length(collect(keys(w))))")
 		end	
 		t += one(t)
 	end
-	return w
+	return ps.w
 end
 
 #function sgd_one_iter(losstype::AbstractString, w::SgdModel, mb_iter::minibatch_iter, penalty::L1L2Penalty, timestep::Float64)
@@ -87,7 +80,8 @@ end
 #	return w
 #end
 
-function predict(testfile::AbstractString, w::SgdModel)
+function predict(testfile::AbstractString, ps::PS)
+	w = ps.w
 	correct::Int64 = 0
 	total::Int64 = 0
 	fout = open(testfile, "r")

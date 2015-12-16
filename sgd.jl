@@ -1,7 +1,7 @@
 module sgd
 
 importall rowblock 
-using minibatch, Loss, l1l2Penalty
+using minibatch, Loss, l1l2Penalty, ParameterServer
 
 export run_sgd, predict
 
