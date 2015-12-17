@@ -1,6 +1,6 @@
 module rowblock
 
-import ArrayViews, Base.show
+import ArrayViews, Base.show, Base.size
 
 export Row, dot, RowBlock, size, getindex, read_svfile, get_value, localize
 
